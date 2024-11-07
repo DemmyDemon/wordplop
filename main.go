@@ -59,6 +59,8 @@ func main() {
 	fmt.Print("\033[2J")   // Clear
 	fmt.Print("\033[?25l") // Hide cursor
 
+	fmt.Printf("\033]0;%s WordPile\007", wordPile.TopWord)
+
 	ticker := time.NewTicker(INTERVAL)
 
 	inputChan := make(chan rune, 1)

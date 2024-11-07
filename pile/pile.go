@@ -18,8 +18,10 @@ func MaybeCrap(what error, where string) {
 }
 
 type WordPile struct {
-	counts map[string]int
-	words  []string
+	TopWord  string
+	topCount int
+	counts   map[string]int
+	words    []string
 }
 
 func clean(line string) string {
@@ -89,6 +91,10 @@ func (pile *WordPile) AddFile(fileName string) {
 			pile.counts[word]++
 			if pile.counts[word] == 1 {
 				wordsFound = append(wordsFound, word)
+			}
+			if pile.counts[word] > pile.topCount {
+				pile.topCount = pile.counts[word]
+				pile.TopWord = word
 			}
 		}
 	}
