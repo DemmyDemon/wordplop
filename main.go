@@ -13,7 +13,7 @@ import (
 	"github.com/DemmyDemon/wordplop/plopper"
 )
 
-const INTERVAL = time.Duration(0.1 * float64(time.Second))
+const INTERVAL = time.Duration(0.05 * float64(time.Second))
 
 func MaybePanic(err error) {
 	if err != nil {

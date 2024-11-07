@@ -10,7 +10,6 @@ import (
 )
 
 type Plopper struct {
-	factor      int
 	wordsTarget int
 	pile        pile.WordPile
 	columns     int
@@ -28,7 +27,6 @@ func New(pile pile.WordPile) Plopper {
 		panic(err) // Hypothetical error
 	}
 	return Plopper{
-		factor:      1,
 		wordsTarget: (size.Height / 2) * (size.Width / 10),
 		pile:        pile,
 		words:       []PlopWord{},
@@ -40,10 +38,10 @@ func (pl *Plopper) Render() string {
 	s := ""
 
 	for _, word := range pl.words {
-		//s += fmt.Sprintf("\033[38;5;%dm%s [%d]", word.Color[int(word.Life/pl.factor)], word.Word, word.Life)
 		s += fmt.Sprintf("\033[%d;%dH", word.Row, word.Column)
 		if word.Life > 0 {
-			s += fmt.Sprintf("\033[38;5;%dm%s", word.Color[int(word.Life/pl.factor)], word.Word)
+
+			s += fmt.Sprintf("\033[38;5;%dm%s", word.GetColor(), word.Word)
 		} else {
 			s += fmt.Sprintf("\033[0m%s", strings.Repeat(" ", len(word.Word)))
 		}
@@ -97,7 +95,7 @@ func (pl *Plopper) Update() {
 
 	if len(pl.words) < pl.wordsTarget {
 		if rand.IntN(1000) < 900 {
-			pl.words = append(pl.words, NewWord(pl.pile, pl.factor))
+			pl.words = append(pl.words, NewWord(pl.pile))
 		}
 		// s += "Added a word!\n"
 	}

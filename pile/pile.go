@@ -42,6 +42,13 @@ func New() WordPile {
 	}
 }
 
+func (pile WordPile) Count(word string) int {
+	if count, ok := pile.counts[word]; ok {
+		return count
+	}
+	return 0
+}
+
 func (pile WordPile) GetWord() string {
 	return pile.words[rand.Intn(len(pile.words))]
 }

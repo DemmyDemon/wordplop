@@ -11,11 +11,12 @@ type PlopWord struct {
 	Column int
 	Row    int
 	Word   string
-	Color  []int
+	Colors []int
 	Life   int
+	Max    int
 }
 
-func NewWord(pl pile.WordPile, factor int) PlopWord {
+func NewWord(pl pile.WordPile) PlopWord {
 	word := pl.GetWord()
 	size, err := tsize.GetSize()
 	if err != nil {
@@ -27,11 +28,24 @@ func NewWord(pl pile.WordPile, factor int) PlopWord {
 
 	color := ColorsGrayscale
 
+	life := len(color) - 1
+	count := pl.Count(word)
+	if count > life {
+		life = count
+	}
+
 	return PlopWord{
 		Column: column,
 		Row:    row,
-		Color:  color,
-		Life:   (len(color) - 1) * factor,
+		Colors: color,
+		Life:   life,
+		Max:    life,
 		Word:   word,
 	}
+}
+
+func (word PlopWord) GetColor() int {
+	ratio := float64(word.Life) / float64(word.Max)
+	index := int(ratio * float64(len(word.Colors)-1))
+	return word.Colors[index]
 }
