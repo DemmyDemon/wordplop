@@ -27,6 +27,9 @@ func clean(line string) string {
 		if unicode.IsLetter(r) || unicode.IsNumber(r) || unicode.IsDigit(r) || unicode.IsSpace(r) {
 			return r
 		}
+		if r == '\'' || r == '-' {
+			return r
+		}
 		return -1
 	}, line)
 }
