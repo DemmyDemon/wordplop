@@ -3,7 +3,6 @@ package plopper
 import (
 	"fmt"
 	"math/rand/v2"
-	"strings"
 
 	"github.com/DemmyDemon/wordplop/pile"
 	tsize "github.com/kopoli/go-terminal-size"
@@ -38,14 +37,7 @@ func (pl *Plopper) Render() string {
 	s := ""
 
 	for _, word := range pl.words {
-		s += fmt.Sprintf("\033[%d;%dH", word.Row, word.Column)
-		if word.Life > 0 {
-
-			s += fmt.Sprintf("\033[38;5;%dm%s", word.GetColor(), word.Word)
-		} else {
-			s += fmt.Sprintf("\033[0m%s", strings.Repeat(" ", len(word.Word)))
-		}
-		// s += "\n"
+		s += word.Render()
 	}
 	return s
 }
@@ -78,14 +70,11 @@ func (pl *Plopper) Update() {
 	}
 
 	dead := []int{}
-	for i, word := range pl.words {
-		word.Life--
-		if word.Life < 0 {
+	for i := 0; i < len(pl.words); i++ {
+		if pl.words[i].Tick() {
 			dead = append(dead, i)
 		}
-		pl.words[i] = word
 	}
-	// s += fmt.Sprintf("Dead:  %#v\n", dead)
 
 	if len(dead) > 0 {
 		for i := len(dead) - 1; i >= 0; i-- {
@@ -97,7 +86,6 @@ func (pl *Plopper) Update() {
 		if rand.IntN(1000) < 900 {
 			pl.words = append(pl.words, NewWord(pl.pile))
 		}
-		// s += "Added a word!\n"
 	}
 
 }

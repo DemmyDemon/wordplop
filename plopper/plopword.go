@@ -1,7 +1,9 @@
 package plopper
 
 import (
+	"fmt"
 	"math/rand/v2"
+	"strings"
 
 	"github.com/DemmyDemon/wordplop/pile"
 	tsize "github.com/kopoli/go-terminal-size"
@@ -14,6 +16,7 @@ type PlopWord struct {
 	Colors []int
 	Life   int
 	Max    int
+	Intro  int
 }
 
 func NewWord(pl pile.WordPile) PlopWord {
@@ -48,4 +51,27 @@ func (word PlopWord) GetColor() int {
 	ratio := float64(word.Life) / float64(word.Max)
 	index := int(ratio * float64(len(word.Colors)-1))
 	return word.Colors[index]
+}
+
+func (word PlopWord) Render() string {
+	s := fmt.Sprintf("\033[%d;%dH", word.Row, word.Column)
+	if word.Intro < len(word.Word) {
+		s += fmt.Sprintf("\033[38;5;%dm%s", word.GetColor(), word.Word[:word.Intro])
+		s += fmt.Sprintf("\033[0m%s", strings.Repeat(" ", len(word.Word)-word.Intro))
+	} else if word.Life > 0 {
+		s += fmt.Sprintf("\033[38;5;%dm%s", word.GetColor(), word.Word)
+	} else {
+		s += fmt.Sprintf("\033[0m%s", strings.Repeat(" ", len(word.Word)))
+	}
+	return s
+}
+
+func (word *PlopWord) Tick() bool {
+	if word.Intro < len(word.Word) {
+		word.Intro++
+		return false
+	}
+
+	word.Life--
+	return word.Life < 0
 }
