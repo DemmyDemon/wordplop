@@ -13,13 +13,13 @@ type PlopWord struct {
 	Column int
 	Row    int
 	Word   string
-	Colors []int
+	Colors [3]int
 	Life   int
 	Max    int
 	Intro  int
 }
 
-func NewWord(pl pile.WordPile) PlopWord {
+func NewWord(pl pile.WordPile, colorName string) PlopWord {
 	word := pl.GetWord()
 	size, err := tsize.GetSize()
 	if err != nil {
@@ -29,9 +29,9 @@ func NewWord(pl pile.WordPile) PlopWord {
 	column := rand.IntN(size.Width - len(word))
 	row := rand.IntN(size.Height)
 
-	color := ColorsGrayscale
+	color := GetColorByName(colorName)
 
-	life := len(color) - 1
+	life := 10
 	count := pl.Count(word)
 	if count > life {
 		life = count
@@ -44,6 +44,7 @@ func NewWord(pl pile.WordPile) PlopWord {
 		Life:   life,
 		Max:    life,
 		Word:   word,
+		Intro:  0,
 	}
 }
 
@@ -53,13 +54,26 @@ func (word PlopWord) GetColor() int {
 	return word.Colors[index]
 }
 
+func (word PlopWord) InRGB(what string) string {
+	r := word.Colors[0]
+	g := word.Colors[1]
+	b := word.Colors[2]
+
+	ratio := float64(word.Life) / float64(word.Max)
+
+	r = int(ratio * float64(r))
+	g = int(ratio * float64(g))
+	b = int(ratio * float64(b))
+
+	return fmt.Sprintf("\033[38;2;%d;%d;%dm%s", r, g, b, what)
+}
+
 func (word PlopWord) Render() string {
 	s := fmt.Sprintf("\033[%d;%dH", word.Row, word.Column)
 	if word.Intro < len(word.Word) {
-		s += fmt.Sprintf("\033[38;5;%dm%s", word.GetColor(), word.Word[:word.Intro])
-		s += fmt.Sprintf("\033[0m%s", strings.Repeat(" ", len(word.Word)-word.Intro))
+		s += word.InRGB(word.Word[:word.Intro])
 	} else if word.Life > 0 {
-		s += fmt.Sprintf("\033[38;5;%dm%s", word.GetColor(), word.Word)
+		s += word.InRGB(word.Word)
 	} else {
 		s += fmt.Sprintf("\033[0m%s", strings.Repeat(" ", len(word.Word)))
 	}
@@ -68,7 +82,9 @@ func (word PlopWord) Render() string {
 
 func (word *PlopWord) Tick() bool {
 	if word.Intro < len(word.Word) {
-		word.Intro++
+		if rand.IntN(1000) >= 750 {
+			word.Intro++
+		}
 		return false
 	}
 

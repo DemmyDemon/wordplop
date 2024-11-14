@@ -55,7 +55,7 @@ func main() {
 		wordPile.AddFile(name)
 	}
 
-	plop := plopper.New(wordPile)
+	plop := plopper.New(wordPile, "red")
 	fmt.Print("\033[2J")   // Clear
 	fmt.Print("\033[?25l") // Hide cursor
 

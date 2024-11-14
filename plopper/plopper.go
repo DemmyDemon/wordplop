@@ -14,13 +14,14 @@ type Plopper struct {
 	columns     int
 	rows        int
 	words       []PlopWord
+	colorName   string
 }
 
 func remove(slice []PlopWord, i int) []PlopWord {
 	return append(slice[:i], slice[i+1:]...)
 }
 
-func New(pile pile.WordPile) Plopper {
+func New(pile pile.WordPile, colorName string) Plopper {
 	size, err := tsize.GetSize()
 	if err != nil {
 		panic(err) // Hypothetical error
@@ -29,6 +30,7 @@ func New(pile pile.WordPile) Plopper {
 		wordsTarget: (size.Height / 2) * (size.Width / 10),
 		pile:        pile,
 		words:       []PlopWord{},
+		colorName:   colorName,
 	}
 }
 
@@ -84,7 +86,7 @@ func (pl *Plopper) Update() {
 
 	if len(pl.words) < pl.wordsTarget {
 		if rand.IntN(1000) < 900 {
-			pl.words = append(pl.words, NewWord(pl.pile))
+			pl.words = append(pl.words, NewWord(pl.pile, pl.colorName))
 		}
 	}
 

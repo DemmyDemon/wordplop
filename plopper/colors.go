@@ -1,10 +1,22 @@
 package plopper
 
-var ColorsGreen = []int{16, 22, 28, 34, 40, 46, 15}
-var ColorsGrayscale = make([]int, 0, 24)
+type RGBValue [3]int
 
-func init() {
-	for i := 23; i >= 0; i-- {
-		ColorsGrayscale = append(ColorsGrayscale, 255-i)
+func GetColorByName(name string) RGBValue {
+	switch name {
+	case "white":
+		return RGBValue{255, 255, 255}
+	case "green":
+		return RGBValue{0, 255, 0}
+	case "red":
+		return RGBValue{255, 0, 0}
+	case "blue":
+		return RGBValue{0, 0, 255}
+	case "yellow":
+		return RGBValue{255, 255, 0}
+	case "orange":
+		return RGBValue{255, 200, 0}
+	default:
+		return RGBValue{255, 0, 255}
 	}
 }
