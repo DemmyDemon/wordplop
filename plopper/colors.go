@@ -16,6 +16,8 @@ func GetColorByName(name string) RGBValue {
 		return RGBValue{255, 255, 0}
 	case "orange":
 		return RGBValue{255, 200, 0}
+	case "dragonberry":
+		return RGBValue{255, 40, 167}
 	default:
 		return RGBValue{255, 0, 255}
 	}

@@ -1,14 +1,16 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
+	"atomicgo.dev/keyboard"
+	"atomicgo.dev/keyboard/keys"
 	"github.com/DemmyDemon/wordplop/pile"
 	"github.com/DemmyDemon/wordplop/plopper"
 )
@@ -76,33 +78,56 @@ func main() {
 
 	ticker := time.NewTicker(INTERVAL)
 
-	inputChan := make(chan rune, 1)
-
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				plop.Update()
-				plop.Draw()
-			case <-inputChan:
-				close(quit)
-			case <-quit:
-				ticker.Stop()
-				fmt.Print("\033[?25h") // Enable cursor
-				fmt.Print("\033[0m")   // Reset color
-				fmt.Print("\033[2J")   // Clear
-				fmt.Print("\033[0;0H") // Set 0,0
-				os.Exit(0)
-			}
-		}
-	}()
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		keyStr, _, err := reader.ReadRune()
-		MaybePanic(err)
-		inputChan <- keyStr
-	}
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
+	go func() {
+		keyboard.Listen(func(key keys.Key) (stop bool, err error) {
+			switch key.Code {
+			case keys.CtrlC, keys.Escape:
+				close(quit)
+				return true, nil
+			case keys.Space:
+				plop.ToggleActive()
+				plop.Clear()
+			case keys.RuneKey:
+				switch key.String() {
+				case "q", "Q":
+					close(quit)
+					return true, nil
+				case "1":
+					plop.SetColorName("red")
+				case "2":
+					plop.SetColorName("green")
+				case "3":
+					plop.SetColorName("yellow")
+				case "4":
+					plop.SetColorName("orange")
+				case "5":
+					plop.SetColorName("blue")
+				case "6":
+					plop.SetColorName("white")
+				case "7":
+					plop.SetColorName("dragonberry")
+				}
+			}
+			return false, nil
+		})
+	}()
+
+	for {
+		select {
+		case <-ticker.C:
+			plop.Update()
+			plop.Draw()
+		case <-quit:
+			ticker.Stop()
+			fmt.Print("\033[?25h") // Enable cursor
+			fmt.Print("\033[0m")   // Reset color
+			fmt.Print("\033[2J")   // Clear
+			fmt.Print("\033[0;0H") // Move cursor top left
+			fmt.Println("OK BYE")
+			os.Exit(0)
+		}
+	}
 }

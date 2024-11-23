@@ -9,6 +9,7 @@ import (
 )
 
 type Plopper struct {
+	active      bool
 	wordsTarget int
 	pile        pile.WordPile
 	columns     int
@@ -23,6 +24,7 @@ func remove(slice []PlopWord, i int) []PlopWord {
 
 func New(pile pile.WordPile, colorName string) Plopper {
 	pl := Plopper{
+		active:    true,
 		pile:      pile,
 		words:     []PlopWord{},
 		colorName: colorName,
@@ -52,15 +54,34 @@ func (pl *Plopper) Add(word ...PlopWord) {
 	pl.words = append(pl.words, word...)
 }
 
+func (pl *Plopper) Clear() {
+	pl.words = []PlopWord{}
+	fmt.Print("\033[2J") // Clear
+}
+
+func (pl *Plopper) ToggleActive() {
+	pl.active = !pl.active
+}
+
+func (pl *Plopper) SetActive(active bool) {
+	pl.active = active
+}
+
+func (pl *Plopper) IsActive() bool {
+	return pl.active
+}
+
+func (pl *Plopper) SetColorName(colorName string) {
+	pl.colorName = colorName
+}
+
 func (pl *Plopper) Resize(size tsize.Size) {
 
 	pl.wordsTarget = (size.Height / 2) * (size.Width / 10)
-	pl.words = []PlopWord{}
-
 	pl.columns = size.Width
 	pl.rows = size.Height
 
-	fmt.Print("\033[2J") // Clear
+	pl.Clear()
 }
 
 func (pl *Plopper) maybeResize() {
@@ -91,7 +112,7 @@ func (pl *Plopper) Update() {
 		}
 	}
 
-	if len(pl.words) < pl.wordsTarget {
+	if len(pl.words) < pl.wordsTarget && pl.active {
 		if rand.IntN(1000) <= 900 {
 			pl.words = append(pl.words, NewWord(pl.pile, pl.colorName))
 		}
