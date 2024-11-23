@@ -51,11 +51,24 @@ func main() {
 
 	wordPile := pile.New()
 
+	loading := []plopper.PlopWord{}
+
 	for _, name := range FileList() {
-		wordPile.AddFile(name)
+		message := wordPile.AddFile(name)
+		fmt.Println(message)
+		loading = append(loading, plopper.PlopWord{
+			Column: 0,
+			Row:    len(loading),
+			Word:   message,
+			Colors: plopper.GetColorByName("white"),
+			Life:   250,
+			Max:    250,
+			Intro:  len(message),
+		})
 	}
 
 	plop := plopper.New(wordPile, "red")
+	plop.Add(loading...)
 	fmt.Print("\033[2J")   // Clear
 	fmt.Print("\033[?25l") // Hide cursor
 

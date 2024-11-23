@@ -22,16 +22,15 @@ func remove(slice []PlopWord, i int) []PlopWord {
 }
 
 func New(pile pile.WordPile, colorName string) Plopper {
-	size, err := tsize.GetSize()
-	if err != nil {
-		panic(err) // Hypothetical error
+	pl := Plopper{
+		pile:      pile,
+		words:     []PlopWord{},
+		colorName: colorName,
 	}
-	return Plopper{
-		wordsTarget: (size.Height / 2) * (size.Width / 10),
-		pile:        pile,
-		words:       []PlopWord{},
-		colorName:   colorName,
-	}
+
+	pl.maybeResize()
+
+	return pl
 }
 
 func (pl *Plopper) Render() string {
@@ -49,6 +48,10 @@ func (pl *Plopper) Draw() {
 	fmt.Print(pl.Render())
 }
 
+func (pl *Plopper) Add(word ...PlopWord) {
+	pl.words = append(pl.words, word...)
+}
+
 func (pl *Plopper) Resize(size tsize.Size) {
 
 	pl.wordsTarget = (size.Height / 2) * (size.Width / 10)
@@ -60,8 +63,7 @@ func (pl *Plopper) Resize(size tsize.Size) {
 	fmt.Print("\033[2J") // Clear
 }
 
-func (pl *Plopper) Update() {
-
+func (pl *Plopper) maybeResize() {
 	size, err := tsize.GetSize()
 	if err != nil {
 		panic(err) // Hypothetical error
@@ -70,6 +72,11 @@ func (pl *Plopper) Update() {
 	if size.Width != pl.columns || size.Height != pl.rows {
 		pl.Resize(size)
 	}
+}
+
+func (pl *Plopper) Update() {
+
+	pl.maybeResize()
 
 	dead := []int{}
 	for i := 0; i < len(pl.words); i++ {
@@ -85,7 +92,7 @@ func (pl *Plopper) Update() {
 	}
 
 	if len(pl.words) < pl.wordsTarget {
-		if rand.IntN(1000) < 900 {
+		if rand.IntN(1000) <= 900 {
 			pl.words = append(pl.words, NewWord(pl.pile, pl.colorName))
 		}
 	}

@@ -58,9 +58,8 @@ func (pile WordPile) GetWord() string {
 	return pile.words[rand.Intn(len(pile.words))]
 }
 
-func (pile *WordPile) AddFile(fileName string) {
+func (pile *WordPile) AddFile(fileName string) string {
 	begin := time.Now()
-	fmt.Printf("Reading %s\n", fileName)
 	file, err := os.Open(fileName)
 	MaybeCrap(err, "Opening file")
 	defer func() {
@@ -100,5 +99,5 @@ func (pile *WordPile) AddFile(fileName string) {
 	}
 	duration := time.Since(begin)
 	pile.words = append(pile.words, wordsFound...)
-	fmt.Printf("Read %d lines, for %d new words, in %s (total now %d words)\n", numLines, len(wordsFound), duration, len(pile.words))
+	return fmt.Sprintf("%s: Read %d lines, for %d new words, in %s (total now %d words)\n", fileName, numLines, len(wordsFound), duration, len(pile.words))
 }
