@@ -95,6 +95,8 @@ func main() {
 				case "q", "Q":
 					close(quit)
 					return true, nil
+				case "t", "T":
+					plop.ToggleTimeDrawing()
 				case "1":
 					plop.SetColorName("red")
 				case "2":

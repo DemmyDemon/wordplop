@@ -3,6 +3,7 @@ package plopper
 import (
 	"fmt"
 	"math/rand/v2"
+	"time"
 
 	"github.com/DemmyDemon/wordplop/pile"
 	tsize "github.com/kopoli/go-terminal-size"
@@ -10,6 +11,7 @@ import (
 
 type Plopper struct {
 	active      bool
+	withTime    bool
 	wordsTarget int
 	pile        pile.WordPile
 	columns     int
@@ -48,6 +50,38 @@ func (pl *Plopper) Render() string {
 func (pl *Plopper) Draw() {
 	fmt.Printf("\033[%d;%dH", 0, 0)
 	fmt.Print(pl.Render())
+	if pl.withTime {
+		pl.drawTime()
+	}
+}
+
+func (pl *Plopper) drawTime() {
+	now := time.Now()
+	column := int(pl.rows / 2)
+	row := int(pl.columns/2) - 6
+
+	color := GetColorByName(pl.colorName)
+	fmt.Printf("\033[38;2;%d;%d;%dm", color[0], color[1], color[2])
+
+	fmt.Printf("\033[%d;%dH┏━━━━━━━━━━┓", column-1, row)
+	fmt.Printf("\033[%d;%dH┃ %02d:%02d:%02d ┃", column, row, now.Hour(), now.Minute(), now.Second())
+	fmt.Printf("\033[%d;%dH┗━━━━━━━━━━┛", column+1, row)
+}
+
+func (pl *Plopper) clearTime() {
+	column := int(pl.rows / 2)
+	row := int(pl.columns/2) - 6
+
+	fmt.Printf("\033[%d;%dH            ", column-1, row)
+	fmt.Printf("\033[%d;%dH            ", column, row)
+	fmt.Printf("\033[%d;%dH            ", column+1, row)
+}
+
+func (pl *Plopper) ToggleTimeDrawing() {
+	pl.withTime = !pl.withTime
+	if !pl.withTime {
+		pl.clearTime()
+	}
 }
 
 func (pl *Plopper) Add(word ...PlopWord) {
