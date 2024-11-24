@@ -59,8 +59,8 @@ func main() {
 		message := wordPile.AddFile(name)
 		fmt.Println(message)
 		loading = append(loading, plopper.PlopWord{
-			Column: 0,
-			Row:    len(loading),
+			Column: 1,
+			Row:    len(loading) + 1,
 			Word:   message,
 			Colors: plopper.GetColorByName("white"),
 			Life:   250,
