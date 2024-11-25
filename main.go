@@ -49,6 +49,40 @@ func FileList() []string {
 	return os.Args[1:]
 }
 
+func keyHandler(plop plopper.Plopper, quit chan os.Signal, key keys.Key) (stop bool, err error) {
+	switch key.Code {
+	case keys.CtrlC, keys.Escape:
+		close(quit)
+		return true, nil
+	case keys.Space:
+		plop.ToggleActive()
+		plop.Clear()
+	case keys.RuneKey:
+		switch key.String() {
+		case "q", "Q":
+			close(quit)
+			return true, nil
+		case "t", "T":
+			plop.ToggleTimeDrawing()
+		case "1":
+			plop.SetColorName("red")
+		case "2":
+			plop.SetColorName("green")
+		case "3":
+			plop.SetColorName("yellow")
+		case "4":
+			plop.SetColorName("orange")
+		case "5":
+			plop.SetColorName("blue")
+		case "6":
+			plop.SetColorName("white")
+		case "7":
+			plop.SetColorName("dragonberry")
+		}
+	}
+	return false, nil
+}
+
 func main() {
 
 	wordPile := pile.New()
@@ -82,39 +116,9 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		keyboard.Listen(func(key keys.Key) (stop bool, err error) {
-			switch key.Code {
-			case keys.CtrlC, keys.Escape:
-				close(quit)
-				return true, nil
-			case keys.Space:
-				plop.ToggleActive()
-				plop.Clear()
-			case keys.RuneKey:
-				switch key.String() {
-				case "q", "Q":
-					close(quit)
-					return true, nil
-				case "t", "T":
-					plop.ToggleTimeDrawing()
-				case "1":
-					plop.SetColorName("red")
-				case "2":
-					plop.SetColorName("green")
-				case "3":
-					plop.SetColorName("yellow")
-				case "4":
-					plop.SetColorName("orange")
-				case "5":
-					plop.SetColorName("blue")
-				case "6":
-					plop.SetColorName("white")
-				case "7":
-					plop.SetColorName("dragonberry")
-				}
-			}
-			return false, nil
-		})
+		MaybePanic(keyboard.Listen(func(key keys.Key) (bool, error) {
+			return keyHandler(plop, quit, key)
+		}))
 	}()
 
 	for {
